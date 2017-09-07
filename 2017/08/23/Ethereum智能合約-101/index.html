@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keyword"  content="">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          Ethereum智能合約 101 - Benjamin Lu | 技術站
+        
+    </title>
+
+    <link rel="canonical" href="https://benjaminlu.github.io/2017/08/23/Ethereum智能合約-101/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: url('/img/header_img/demo.png')
+            
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#solidity" title="solidity">solidity</a>
+                            
+                              <a class="tag" href="/tags/#ethereum" title="ethereum">ethereum</a>
+                            
+                              <a class="tag" href="/tags/#blockchain" title="blockchain">blockchain</a>
+                            
+                        </div>
+                        <h1>Ethereum智能合約 101</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Benjamin Lu on
+                            2017-08-23
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Ben { blogging }</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1><span id="ethereum智能合約-101">Ethereum智能合約 101</span></h1>
+<h2><span id="安裝go-ethereum">安裝go-ethereum</span></h2>
+<p><a href="https://github.com/ethereum/homebrew-ethereum" target="_blank" rel="external">Mac</a></p>
+<p><a href="https://github.com/ethereum/go-ethereum/wiki/Installation-instructions-for-Windows" target="_blank" rel="external">Windows或其他版本</a></p>
+<h2><span id="開啟一個私有鏈開發節點">開啟一個私有鏈開發節點</span></h2>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">geth --dev</div><div class="line"></div><div class="line">WARN [07-03|13:08:30] No etherbase set and no accounts found as default</div><div class="line">INFO [07-03|13:08:30] Starting peer-to-peer node               instance=Geth/v1.6.5-stable-cf87713d/darwin-amd64/go1.8.3</div><div class="line">INFO [07-03|13:08:30] Allocated cache and file handles         database=/var/folders/hs/tgqs62993t9gkrkr86d7z2hc0000gn/T/ethereum_dev_mode/geth/chaindata cache=128 handles=1024</div><div class="line">INFO [07-03|13:08:30] Initialised chain configuration          config="&#123;ChainID: 1337 Homestead: 0 DAO: &lt;nil&gt; DAOSupport: false EIP150: 0 EIP155: 0 EIP158: 0 Metropolis: 0 Engine: ethash&#125;"</div><div class="line">WARN [07-03|13:08:30] Ethash used in test mode</div><div class="line">INFO [07-03|13:08:30] Initialising Ethereum protocol           versions="[63 62]" network=1</div><div class="line">INFO [07-03|13:08:30] Loaded most recent local header          number=0 hash=e5be92…38f3bc td=131072</div><div class="line">INFO [07-03|13:08:30] Loaded most recent local full block      number=0 hash=e5be92…38f3bc td=131072</div><div class="line">INFO [07-03|13:08:30] Loaded most recent local fast block      number=0 hash=e5be92…38f3bc td=131072</div><div class="line">INFO [07-03|13:08:30] Starting P2P networking</div><div class="line">INFO [07-03|13:08:30] started whisper v.5.0</div><div class="line">INFO [07-03|13:08:30] RLPx listener up                         self="enode://f7a7c9f414faa49e0e6bb72c1bddead9c6f8074e48323d444c23cafffb3583b42ab0dd496053f81f76004a4931228cce5989a3227130be42c7dd81e3332d4831@[::]:65282?discport=0"</div><div class="line">INFO [07-03|13:08:30] IPC endpoint opened: /var/folders/hs/tgqs62993t9gkrkr86d7z2hc0000gn/T/ethereum_dev_mode/geth.ipc</div></pre></td></tr></table></figure>
+<p>上方會顯示測試鏈放置資料的路徑<code>.../chaindata</code>資料夾底下<br>
+<code>network=1</code>表示要跟此節點互相同步區塊要設定的subnet id<br>
+同時創世區塊要相同，且透過admin.addPeer()指令進行p2p網路的溝通<br>
+之後透過指定的ipc可以跟這個節點溝通，此案例是<code>/var/folders/hs/tgqs62993t9gkrkr86d7z2hc0000gn/T/ethereum_dev_mode/geth.ipc</code></p>
+<h2><span id="透過geth-javascript-console-連接節點">透過Geth JavaScript console 連接節點</span></h2>
+<p>此例IPC是<code>/var/folders/hs/tgqs62993t9gkrkr86d7z2hc0000gn/T/ethereum_dev_mode/geth.ipc</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">geth attach &lt;IPC path&gt;</div></pre></td></tr></table></figure>
+<h1><span id="操作節點指令">操作節點指令</span></h1>
+<p><a href="https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethgetbalance" target="_blank" rel="external">官方文件</a></p>
+<h2><span id="account">Account</span></h2>
+<p>Account列表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">eth.accounts</div></pre></td></tr></table></figure>
+<p>創一個新帳號</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">personal.newAccount("your password")</div><div class="line">"0x4560eb5a01478cbfa1390a4134cd752d99746266"</div></pre></td></tr></table></figure>
+<p>解鎖帳號才能做交易</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">personal.unlockAccount("0x4560eb5a01478cbfa1390a4134cd752d99746266", "your password")</div><div class="line">true</div></pre></td></tr></table></figure>
+<p>以後開啟節點直接解鎖</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">geth --dev --unlock 0x4560eb5a01478cbfa1390a4134cd752d99746266</div><div class="line"></div><div class="line">...</div><div class="line"></div><div class="line">Passphrase: &lt;your password&gt;</div></pre></td></tr></table></figure>
+<h2><span id="控制miner">控制Miner</span></h2>
+<p>預設用第一個account的地址作為coinbase地址<br>
+所以開始挖礦以後，coinbase地址就會有錢</p>
+<p>用PoA還是PoW的設定可以看meetup的<a href="https://medium.com/taipei-ethereum-meetup/%E4%BD%BF%E7%94%A8-go-ethereum-1-6-clique-poa-consensus-%E5%BB%BA%E7%AB%8B-private-chain-1-4d359f28feff" target="_blank" rel="external">文章</a></p>
+<p>公網在PoS上線前，還是用PoW算sha3()<br>
+PoA 不用挖礦，只需要指定節點做Authority</p>
+<p>Parity 1.5版 (Rust語言撰寫)以後支援建立Proof of Authority Chains<br>
+geth 1.6 (Go語言撰寫)之後支援PoA<br>
+但兩者的PoA根據不同的EIP來實作</p>
+<p>geth實作的PoA為<a href="https://github.com/ethereum/EIPs/issues/225" target="_blank" rel="external">EIPs 225</a><br>
+稱<strong>Clique PoA protocol</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">miner.start() // 開始挖礦 coinbase地址會有ETH讓你做交易或轉帳</div><div class="line">miner.start(3) // 同時3條thread在挖礦</div><div class="line"></div><div class="line">miner.stop() // 結束挖礦</div><div class="line">eth.mining // 看是不是在挖礦</div><div class="line"></div><div class="line">eth.coinbase // 礦工會得到虛擬貨幣獎勵的地址</div><div class="line"></div><div class="line">miner.setEtherbase(eth.accounts[2]) // 換礦工地址</div></pre></td></tr></table></figure>
+<h2><span id="交易相關指令">交易相關指令</span></h2>
+<h3><span id="你有多少錢">你有多少錢</span></h3>
+<p><a href="http://forum.ethereum.org/discussion/1518/ether-unit-converter-wei-finney-szabo-btc" target="_blank" rel="external">Ether unit單位表</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">eth.getBalance("0x4560eb5a01478cbfa1390a4134cd752d99746266")</div><div class="line">120000000000000000000 // 單位是wei, 1 ether = 10的負18次方個wei</div><div class="line"></div><div class="line">web3.fromWei(eth.getBalance(eth.accounts[0])) // 第0個地址有多少ETH</div><div class="line"></div><div class="line">web3.toWei(120) // 120個ether是多少個wei</div><div class="line">"120000000000000000000"</div></pre></td></tr></table></figure>
+<h3><span id="做一個轉帳交易">做一個轉帳交易</span></h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;</span> eth.accounts</div><div class="line">["0x4560eb5a01478cbfa1390a4134cd752d99746266", "0xcd9f3bf82cce5a654a6e7f729200f86dc9cc96c7"]</div></pre></td></tr></table></figure>
+<p>從<code>0x4560eb5a01478cbfa1390a4134cd752d99746266</code>轉帳1個ETH到<code>0xcd9f3bf82cce5a654a6e7f729200f86dc9cc96c7</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">eth.sendTransaction(&#123;</div><div class="line">    from: "0x4560eb5a01478cbfa1390a4134cd752d99746266", </div><div class="line">    to: "0xcd9f3bf82cce5a654a6e7f729200f86dc9cc96c7" </div><div class="line">    value: web3.toWei(1)</div><div class="line">&#125;)</div><div class="line"></div><div class="line">"0x4aa3627a3cc245542cf57c51036689216371bfb373744186f229207fb63cbdf7"</div><div class="line"></div><div class="line">eth.getTransaction("0x4aa3627a3cc245542cf57c51036689216371bfb373744186f229207fb63cbdf7")</div><div class="line"></div><div class="line">&#123;</div><div class="line">  blockHash: "0xd14ff6de146210fc3b27e9771faa932de12a9abf721b12aaef88088d8d1395ae",</div><div class="line">  blockNumber: 136,</div><div class="line">  from: "0x4560eb5a01478cbfa1390a4134cd752d99746266",</div><div class="line">  gas: 90000, // 花掉的gas</div><div class="line">  gasPrice: 0, // 私有鏈沒有gasPrice的問題</div><div class="line">  hash: "0x4aa3627a3cc245542cf57c51036689216371bfb373744186f229207fb63cbdf7",</div><div class="line">  input: "0x",</div><div class="line">  nonce: 0, // 用這個值在處理double spending</div><div class="line">  r: "0xebd558f63d574a0002ba3be4b495c058ab6ad6d1803d1eb1bc10fa01e9be32e7",</div><div class="line">  s: "0x81d5efa2f81a7e11e639ff9a64aa9554f8bab9fe0bf43995ae3b63d4eb4fa1e",</div><div class="line">  to: "0xcd9f3bf82cce5a654a6e7f729200f86dc9cc96c7",</div><div class="line">  transactionIndex: 0,</div><div class="line">  v: "0xa95",</div><div class="line">  value: 1000000000000000000</div><div class="line">&#125;</div><div class="line"></div><div class="line">web3.fromWei(eth.getBalance("0xcd9f3bf82cce5a654a6e7f729200f86dc9cc96c7")) // 的確收到1ETH</div></pre></td></tr></table></figure>
+<h2><span id="智能合約-101-solidity為例">智能合約 101 - Solidity為例</span></h2>
+<p>Ethereum的EVM上智能合約語言有以下幾種:</p>
+<ol>
+<li>Solidity (Javascript-like)</li>
+<li>Viper (Python-like)</li>
+<li>Serpent (Python-like)</li>
+<li>LLL (Lisp-like)</li>
+<li>Mutan (Golang-like)</li>
+</ol>
+<p>這邊用Solidity當作寫合約的語言</p>
+<h3><span id="智能合約ide">智能合約IDE</span></h3>
+<p><a href="https://remix.ethereum.org/" target="_blank" rel="external">Remix 線上IDE</a></p>
+<h3><span id="常用關鍵字">常用關鍵字</span></h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line">// 部署合約或呼叫合約的人</div><div class="line">msg.sender</div><div class="line"></div><div class="line">// 部署或呼叫合約的人付的錢</div><div class="line">msg.value</div><div class="line"></div><div class="line">// 合約的餘額</div><div class="line">this.balance</div><div class="line"></div><div class="line">// 由合約的錢轉帳this.balance數量的虛擬貨幣給address，會在鏈上形成交易</div><div class="line">address.transfer(this.balance);</div><div class="line"></div><div class="line">// 合約方法會需要收ether需要加關鍵字payable</div><div class="line">// 沒有加的話呼叫該函式順便帶ether的話就會造成error</div><div class="line">function pledge(bytes32 _message) payable &#123;</div><div class="line">    if (msg.value == 0 || complete || refunded) revert(); // 權限管控 不合格 停止執行 回復合約狀態</div><div class="line">    pledges[numPledges] = Pledge(msg.value, msg.sender, _message);</div><div class="line">    numPledges++;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 使用其他合約物件，要寫路徑和副檔名</div><div class="line">import &quot;Another.sol&quot;</div><div class="line"></div><div class="line">// 毀滅合約，將合約餘額轉給某個地址</div><div class="line">// 當合約被銷毀, 如果有人再寄錢 (Ethers) 到該合約地址, 是不會被退回的, 它也就此消失</div><div class="line">suicide(address)</div><div class="line">// 0.4.0以上版本</div><div class="line">selfdestruct(address)</div><div class="line"></div><div class="line">// 資料格式</div><div class="line">struct Pledge &#123;</div><div class="line">    uint amount;</div><div class="line">    address eth_address;</div><div class="line">    bytes32 message;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 修飾子等級</div><div class="line">// function預設是public，state預設是internal</div><div class="line">public - all</div><div class="line">private - only this contract</div><div class="line">internal - only this contract and contracts deriving from it</div><div class="line">external - Cannot be accessed internally, only externally.</div><div class="line"></div><div class="line">// mapping存key-value資料</div><div class="line">mapping (address =&gt; uint) pendingWithdrawals;</div><div class="line"></div><div class="line">// modifier重用檢查</div><div class="line">modifier onlyOwner() &#123;</div><div class="line">    if (msg.sender != owner) throw;</div><div class="line">    // 0.4.0之後這樣寫</div><div class="line">    _;</div><div class="line">&#125;</div><div class="line"></div><div class="line">function forceOwnerChange(address _newOwner) onlyOwner</div><div class="line">&#123;</div><div class="line">    // just some example condition</div><div class="line">    if (uint(owner) &amp; 0 == 1)</div><div class="line">        // This did not refund for Solidity</div><div class="line">        // before version 0.4.0.</div><div class="line">        return;</div><div class="line">    // refund overpaid fees</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其他語法請看<a href="http://solidity.readthedocs.io/en/develop/index.html" target="_blank" rel="external">官方文件</a></p>
+<h3><span id="撰寫合約程式">撰寫合約程式</span></h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">pragma solidity ^0.4.0;</div><div class="line"></div><div class="line">contract test &#123;</div><div class="line">   function multiply(uint a) constant returns(uint d) &#123;</div><div class="line">      return a * 7;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="透過web3js和abi建立對應合約的js物件">透過web3.js和ABI建立對應合約的js物件</span></h3>
+<p>ABI為Application Binary Interface<br>
+要讓其他程式語言看懂合約的接口所以需要該介面</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">// web3常用格式，透過ABI產生可與合約互動的js物件</div><div class="line">var contractClass = web3.eth.contract(&lt;ABI&gt;)</div><div class="line"></div><div class="line">// 等下用此物件來部署此類合約</div><div class="line">var browser_ballot_sol_testContract = web3.eth.contract([&#123;"constant":true,"inputs":[&#123;"name":"a","type":"uint256"&#125;],"name":"multiply","outputs":[&#123;"name":"d","type":"uint256"&#125;],"payable":false,"type":"function"&#125;])</div></pre></td></tr></table></figure>
+<h3><span id="部署合約與呼叫合約">部署合約與呼叫合約</span></h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">// 評估要花多少gas，通常會將此數字乘以1.2</div><div class="line">web3.eth.estimateGas(&#123;data: '0x' + &lt;bytecode&gt;&#125;)</div><div class="line"></div><div class="line">// 估計部署合約要花多少gas</div><div class="line">web3.eth.estimateGas(&#123;data: '0x6060604052341561000f57600080fd5b5b60ab8061001e6000396000f30060606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063c6888fa114603d575b600080fd5b3415604757600080fd5b605b60048080359060200190919050506071565b6040518082815260200191505060405180910390f35b60006007820290505b9190505600a165627a7a72305820668369d5ec98bbd9e537eb377a779e58f87d27b4cb70f247366fafb14ceff1170029'&#125;)</div><div class="line"></div><div class="line">98392</div><div class="line"></div><div class="line">// 部署合約並產生合約的實例</div><div class="line">var browser_ballot_sol_test = browser_ballot_sol_testContract.new(</div><div class="line">   &#123;</div><div class="line">     // 用哪個地址去部署合約</div><div class="line">     from: web3.eth.accounts[0], </div><div class="line">     // 合約程式碼的bytecode</div><div class="line">     data: '0x6060604052341561000f57600080fd5b5b60ab8061001e6000396000f30060606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063c6888fa114603d575b600080fd5b3415604757600080fd5b605b60048080359060200190919050506071565b6040518082815260200191505060405180910390f35b60006007820290505b9190505600a165627a7a72305820668369d5ec98bbd9e537eb377a779e58f87d27b4cb70f247366fafb14ceff1170029', </div><div class="line">     // 要花的gas</div><div class="line">     gas: '4700000'</div><div class="line">   &#125;, function (e, contract)&#123;</div><div class="line">    // 當成功部署合約 顯示合約地址和部署合約的交易</div><div class="line">    console.log(e, contract);</div><div class="line">    if (typeof contract.address !== 'undefined') &#123;</div><div class="line">         console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);</div><div class="line">    &#125;</div><div class="line"> &#125;)</div><div class="line"> </div><div class="line">Contract mined! address: 0x2ff5f980d80cb37a5cd92678157ed49b06ef324f transactionHash: 0x0b5ba1bbdc28dddaa6b0b0207e9c72576c8c10b9db9b49b680791a33a4ab0bc7</div><div class="line"></div><div class="line">eth.getTransaction("0x0b5ba1bbdc28dddaa6b0b0207e9c72576c8c10b9db9b49b680791a33a4ab0bc7")</div><div class="line"></div><div class="line">&#123;</div><div class="line">  blockHash: "0xd139f77cba988b25ae7f10c12138b28e6630808259b86f290540bf7d80cbd10d",</div><div class="line">  blockNumber: 858,</div><div class="line">  from: "0x4560eb5a01478cbfa1390a4134cd752d99746266",</div><div class="line">  gas: 4700000,</div><div class="line">  gasPrice: 0,</div><div class="line">  hash: "0x0b5ba1bbdc28dddaa6b0b0207e9c72576c8c10b9db9b49b680791a33a4ab0bc7",</div><div class="line">  input: "0x6060604052341561000f57600080fd5b5b60ab8061001e6000396000f30060606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063c6888fa114603d575b600080fd5b3415604757600080fd5b605b60048080359060200190919050506071565b6040518082815260200191505060405180910390f35b60006007820290505b9190505600a165627a7a72305820668369d5ec98bbd9e537eb377a779e58f87d27b4cb70f247366fafb14ceff1170029",</div><div class="line">  nonce: 1,</div><div class="line">  r: "0x47f9359d20cded498ef3719390e4fbfe654f6438fbec71c397b29c70e8224f0d",</div><div class="line">  s: "0x4cf4a110964044afd7de6bc3d1905f90583013d9948ed37736ebdc99b894c63d",</div><div class="line">  to: null,</div><div class="line">  transactionIndex: 0,</div><div class="line">  v: "0xa95",</div><div class="line">  value: 0</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 從js程式其他地方建立此合約地址的實例(意圖查看或改變此合約地址的state)</div><div class="line">var contract = web3.eth.contract(&lt;ABI&gt;).at(&lt;contract address&gt;)</div><div class="line"></div><div class="line">var contract = web3.eth.contract([&#123;"constant":true,"inputs":[&#123;"name":"a","type":"uint256"&#125;],"name":"multiply","outputs":[&#123;"name":"d","type":"uint256"&#125;],"payable":false,"type":"function"&#125;]).at("0x2ff5f980d80cb37a5cd92678157ed49b06ef324f")</div><div class="line"></div><div class="line">// 與合約互動</div><div class="line">browser_ballot_sol_test.multiply(7)</div><div class="line">49 // 與合約互動的結果，呼叫合約的constant方法 不會在鏈上產生交易，不用等挖礦，也沒有改變state(不是合約的成員變數)，純粹回傳某個值</div><div class="line"></div><div class="line">contract.multiply(15)</div><div class="line">105</div></pre></td></tr></table></figure>
+<p>區塊鏈系統的好處是<br>
+<strong>所有跟此節點同步區塊的節點，都可以跟此合約地址的合約互動與透過介面操作該合約的state</strong><br>
+形成一個網路，發展更多應用</p>
+<p><a href="https://medium.com/taipei-ethereum-meetup/ethereum-smart-contract-%E6%92%B0%E5%AF%AB-68588a3d8358" target="_blank" rel="external">meetup的合約教學</a></p>
+<h2><span id="更複雜的合約案例-募款">更複雜的合約案例 - 募款</span></h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">pragma solidity ^0.4.0;</div><div class="line"></div><div class="line">contract smartSponsor &#123;</div><div class="line">  address public owner;</div><div class="line">  address public benefactor;</div><div class="line">  bool public refunded;</div><div class="line">  bool public complete;</div><div class="line">  uint public numPledges;</div><div class="line">  struct Pledge &#123;</div><div class="line">    uint amount;</div><div class="line">    address eth_address;</div><div class="line">    bytes32 message;</div><div class="line">  &#125;</div><div class="line">  mapping(uint =&gt; Pledge) public pledges;</div><div class="line"></div><div class="line">  // constructor</div><div class="line">  function smartSponsor(address _benefactor) &#123;</div><div class="line">    owner = msg.sender;</div><div class="line">    numPledges = 0;</div><div class="line">    refunded = false;</div><div class="line">    complete = false;</div><div class="line">    benefactor = _benefactor;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  // add a new pledge</div><div class="line">  function pledge(bytes32 _message) payable &#123;</div><div class="line">    if (msg.value == 0 || complete || refunded) revert();</div><div class="line">    pledges[numPledges] = Pledge(msg.value, msg.sender, _message);</div><div class="line">    numPledges++;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  function getPot() constant returns (uint) &#123;</div><div class="line">    return this.balance;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  // refund the backers</div><div class="line">  function refund() &#123;</div><div class="line">    if (msg.sender != owner || complete || refunded) revert();</div><div class="line">    for (uint i = 0; i &lt; numPledges; ++i) &#123;</div><div class="line">      pledges[i].eth_address.transfer(pledges[i].amount);</div><div class="line">    &#125;</div><div class="line">    refunded = true;</div><div class="line">    complete = true;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  // send funds to the contract benefactor</div><div class="line">  function drawdown() &#123;</div><div class="line">    if (msg.sender != owner || complete || refunded) revert();</div><div class="line">    benefactor.transfer(this.balance);</div><div class="line">    complete = true;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><a href="https://github.com/kairen/learning-blockchain/blob/master/ethereum/smart-contracts.md" target="_blank" rel="external">原文</a></p>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/08/25/SOLID-原則/" data-toggle="tooltip" data-placement="top" title="SOLID 原則">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/08/22/Javascript非同步處理-Promise-Async-Await/" data-toggle="tooltip" data-placement="top" title="Javascript非同步處理 / Promise / Async Await">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Ethereum智能合約 101</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.1.</span> <span class="toc-nav-text">安裝go-ethereum</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.2.</span> <span class="toc-nav-text">開啟一個私有鏈開發節點</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.3.</span> <span class="toc-nav-text">透過Geth JavaScript console 連接節點</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">操作節點指令</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">Account</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">控制Miner</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.3.</span> <span class="toc-nav-text">交易相關指令</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.3.1.</span> <span class="toc-nav-text">你有多少錢</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.3.2.</span> <span class="toc-nav-text">做一個轉帳交易</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.</span> <span class="toc-nav-text">智能合約 101 - Solidity為例</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.1.</span> <span class="toc-nav-text">智能合約IDE</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.2.</span> <span class="toc-nav-text">常用關鍵字</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.3.</span> <span class="toc-nav-text">撰寫合約程式</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.4.</span> <span class="toc-nav-text">透過web3.js和ABI建立對應合約的js物件</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.5.</span> <span class="toc-nav-text">部署合約與呼叫合約</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.5.</span> <span class="toc-nav-text">更複雜的合約案例 - 募款</span></a></li></ol></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#solidity" title="solidity">solidity</a>
+                        
+                          <a class="tag" href="/tags/#ethereum" title="ethereum">ethereum</a>
+                        
+                          <a class="tag" href="/tags/#blockchain" title="blockchain">blockchain</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "benjaminlu";
+    var disqus_identifier = "https://benjaminlu.github.io/2017/08/23/Ethereum智能合約-101/";
+    var disqus_url = "https://benjaminlu.github.io/2017/08/23/Ethereum智能合約-101/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/Benjamin.Lu.J">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/BenjaminLu">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/benjamin-lu-893b8b109">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Benjamin Lu 2017
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://benjaminlu.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-52139860-2';
+    var _gaDomain = 'benjaminlu.github.io';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<img src="https://benjaminlu.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

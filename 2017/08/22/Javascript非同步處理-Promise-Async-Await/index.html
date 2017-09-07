@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keyword"  content="">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          Javascript非同步處理 / Promise / Async Await - Benjamin Lu | 技術站
+        
+    </title>
+
+    <link rel="canonical" href="https://benjaminlu.github.io/2017/08/22/Javascript非同步處理-Promise-Async-Await/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: url('/img/header_img/demo.png')
+            
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#js" title="js">js</a>
+                            
+                              <a class="tag" href="/tags/#101" title="101">101</a>
+                            
+                        </div>
+                        <h1>Javascript非同步處理 / Promise / Async Await</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Benjamin Lu on
+                            2017-08-22
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Ben { blogging }</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1><span id="javascript非同步處理-promise-async-await">Javascript非同步處理 / Promise / Async Await</span></h1>
+<h2><span id="nodejs線程模型">Node.js線程模型</span></h2>
+<p>單線程且非同步?</p>
+<p>請參閱資料</p>
+<p><a href="https://simeneer.blogspot.tw/2016/09/nodejs-eventemitter.html" target="_blank" rel="external">非同步程式碼之霧：Node.js 的事件迴圈與 EventEmitter</a></p>
+<h2><span id="javascript非同步程式與處理callback-hell">Javascript非同步程式與處理Callback Hell</span></h2>
+<p>使用setTimeout模擬ajax去server side取得message的資料後<br>
+每一個工作依賴於前一個先做完才能往下做</p>
+<ol>
+<li>顯示取回的資料</li>
+<li>跟之前的資料做加總</li>
+<li>最後顯示總和</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">var</span> message = <span class="number">1</span> <span class="comment">// 取回資料</span></div><div class="line">  <span class="built_in">console</span>.log(message)</div><div class="line">  <span class="keyword">var</span> sum = message <span class="comment">// 加總</span></div><div class="line">  </div><div class="line">  <span class="comment">// 第一個請求結束，開始下一個請求</span></div><div class="line">  setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> message = <span class="number">1</span> <span class="comment">// 取回資料</span></div><div class="line">    <span class="built_in">console</span>.log(message)</div><div class="line">    sum += message <span class="comment">// 跟之前的資料做加總</span></div><div class="line">    </div><div class="line">    <span class="comment">// 第二個請求結束，開始下一個請求</span></div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      <span class="keyword">var</span> message = <span class="number">1</span> <span class="comment">// 取回資料</span></div><div class="line">      <span class="built_in">console</span>.log(message)</div><div class="line">      sum += message <span class="comment">// 跟之前的資料做加總</span></div><div class="line">      </div><div class="line">      <span class="comment">// 第三個請求結束，開始下一個請求</span></div><div class="line">      setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">        <span class="comment">// 第四個請求結束</span></div><div class="line">        <span class="built_in">console</span>.log(message) <span class="comment">// 取回資料</span></div><div class="line">        sum += message <span class="comment">// 加總</span></div><div class="line">        <span class="built_in">console</span>.log(sum) <span class="comment">// 做最後的處理</span></div><div class="line">      &#125;, <span class="number">1000</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;, <span class="number">1000</span>)</div><div class="line">&#125;, <span class="number">1000</span>)</div></pre></td></tr></table></figure>
+<p>如果有幾個非同步請求彼此相依，要依照順序執行時<br>
+這種一層一層弓形的callback function就會形成沒有可讀性，難維護的程式碼<br>
+稱為<code>callback hell</code></p>
+<p>例如：你有三個後端API</p>
+<ol>
+<li>取得文章列表</li>
+<li>取得某文章的回文列表</li>
+<li>取得某回文的作者信箱</li>
+</ol>
+<p>在前端就可能要依照順序呼叫這三個API就有可能寫出這樣的程式碼</p>
+<p>如何處理?</p>
+<h2><span id="promise來拯救">Promise來拯救!</span></h2>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> sum = <span class="number">0</span></div><div class="line"></div><div class="line"><span class="keyword">var</span> first = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> second = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> third = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> fourth = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 一個Promise做完之後印出Promise工作取得的資料，並開始下一個Promise工作</span></div><div class="line">first().then(<span class="function"><span class="keyword">function</span> (<span class="params">message</span>) </span>&#123;</div><div class="line">  <span class="comment">// 1</span></div><div class="line">  <span class="built_in">console</span>.log(message) <span class="comment">// 取回資料</span></div><div class="line">  sum += message <span class="comment">// 加總</span></div><div class="line">  <span class="keyword">return</span> second() <span class="comment">// 第一個請求結束，開始第二個請求</span></div><div class="line">&#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params">message</span>) </span>&#123;</div><div class="line">  <span class="comment">// 1</span></div><div class="line">  <span class="built_in">console</span>.log(message) <span class="comment">// 取回資料</span></div><div class="line">  sum += message <span class="comment">// 加總</span></div><div class="line">  <span class="keyword">return</span> third() <span class="comment">// 第二個請求結束，開始第三個請求</span></div><div class="line">&#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params">message</span>) </span>&#123;</div><div class="line">  <span class="comment">// 1</span></div><div class="line">  <span class="built_in">console</span>.log(message) <span class="comment">// 取回資料</span></div><div class="line">  sum += message <span class="comment">// 加總</span></div><div class="line">  <span class="keyword">return</span> fourth() <span class="comment">// 第三個請求結束，開始第四個請求</span></div><div class="line">&#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params">message</span>) </span>&#123;</div><div class="line">  <span class="comment">// 第四個請求結束</span></div><div class="line">  <span class="comment">// 1</span></div><div class="line">  <span class="built_in">console</span>.log(message) <span class="comment">// 取回資料</span></div><div class="line">  sum += message <span class="comment">// 加總</span></div><div class="line">  <span class="comment">// 4</span></div><div class="line">  <span class="built_in">console</span>.log(sum) <span class="comment">// 最後處理</span></div><div class="line">&#125;).catch(<span class="built_in">console</span>.error) <span class="comment">// 如果中間發生錯誤，做錯誤處理</span></div></pre></td></tr></table></figure>
+<p>除了使用ES6原生支援的Promise物件外<br>
+在不支援Promise的環境下，還有很多可以替代的套件</p>
+<ol>
+<li><a href="https://github.com/kriskowal/q" target="_blank" rel="external">Q</a></li>
+<li><a href="https://api.jquery.com/category/deferred-object/" target="_blank" rel="external">jQuery Deferred Object</a></li>
+<li><a href="https://github.com/petkaantonov/bluebird" target="_blank" rel="external">bluebird</a></li>
+<li><a href="https://github.com/cujojs/when" target="_blank" rel="external">when</a></li>
+<li><a href="https://github.com/tildeio/rsvp.js/" target="_blank" rel="external">RSVP</a></li>
+<li><a href="https://github.com/RubyLouvre/mmDeferred" target="_blank" rel="external">mmDeferred</a></li>
+</ol>
+<p>延伸資料: Promise的規格</p>
+<ol>
+<li><a href="http://eddychang.me/blog/javascript/89-promise-aplus.html" target="_blank" rel="external">Promise A+</a></li>
+<li><a href="http://wiki.commonjs.org/wiki/Promises/A" target="_blank" rel="external">CommonJS Promises/A</a></li>
+</ol>
+<p>是沒有callback hell了，但是程式碼一堆<code>then</code>，也不是很容易看懂<br>
+有沒有更簡單的寫法?</p>
+<h2><span id="先談es6-generator與yield">先談ES6 Generator與yield</span></h2>
+<p>用<code>*</code>modifier標注function</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> *<span class="title">gen</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'start'</span>)</div><div class="line">  <span class="keyword">yield</span> <span class="string">"first"</span></div><div class="line">  <span class="keyword">yield</span> <span class="string">"second"</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 還不會執行方法，而是返回一個generator物件</span></div><div class="line"><span class="keyword">var</span> g = gen()</div><div class="line"><span class="built_in">console</span>.log(g)</div><div class="line"></div><div class="line"><span class="comment">// 顯示start，得到yield的值，並回傳一個物件，yield的值被存在a.value中</span></div><div class="line"><span class="comment">// &#123;"done": false, "value": "first"&#125;</span></div><div class="line"><span class="keyword">var</span> a = g.next()</div><div class="line"><span class="built_in">console</span>.log(a)</div><div class="line"></div><div class="line"><span class="comment">// &#123;"done": false, "value": "second"&#125;</span></div><div class="line"><span class="keyword">var</span> a = g.next()</div><div class="line"><span class="built_in">console</span>.log(a)</div><div class="line"></div><div class="line"><span class="comment">// 再執行一次</span></div><div class="line">a = g.next()</div><div class="line"><span class="comment">// 顯示&#123;"done": true,"value": undefined&#125;</span></div><div class="line"><span class="built_in">console</span>.log(a)</div></pre></td></tr></table></figure>
+<p>跟Promise合作</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> sum = <span class="number">0</span></div><div class="line"></div><div class="line"><span class="keyword">var</span> first = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> second = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> third = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> fourth = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> *<span class="title">gen</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">yield</span> first()</div><div class="line">  <span class="keyword">yield</span> second()</div><div class="line">  <span class="keyword">yield</span> third()</div><div class="line">  <span class="keyword">yield</span> fourth()</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 改寫上方generator寫法成遞迴</span></div><div class="line"><span class="keyword">let</span> g = gen()</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetch</span>(<span class="params">result</span>) </span>&#123;</div><div class="line">    <span class="keyword">if</span>(result.done) &#123;</div><div class="line">      <span class="comment">// 全部請求結束，做最後處理</span></div><div class="line">      <span class="built_in">console</span>.log(sum) <span class="comment">// 4</span></div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      <span class="comment">// 請求尚未全部結束，取回請求結果，繼續執行下一個請求</span></div><div class="line">      result.value.then(<span class="function"><span class="keyword">function</span> (<span class="params">message</span>) </span>&#123;</div><div class="line">        <span class="built_in">console</span>.log(message) <span class="comment">// 1，取回結果</span></div><div class="line">        sum += message <span class="comment">// 加總</span></div><div class="line">        <span class="comment">// 遞迴呼叫</span></div><div class="line">        fetch(g.next()) <span class="comment">// 做下一個請求</span></div><div class="line">      &#125;) </div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">fetch(g.next()) <span class="comment">// 執行第一個請求</span></div></pre></td></tr></table></figure>
+<p>這樣看起來其實語法上並沒有比較簡潔<br>
+但有其他利用generator做flow control的套件</p>
+<ul>
+<li><a href="https://github.com/tj/co" target="_blank" rel="external">co</a></li>
+</ul>
+<h2><span id="es7-async-await">ES7 Async Await</span></h2>
+<p><strong>Babel以及Node.js 7.6以上版本支援</strong></p>
+<p>先談generator和yield是要說明async/await的原理</p>
+<p><strong>async/await是generator, yield和promise的語法糖</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> sum = <span class="number">0</span></div><div class="line"></div><div class="line"><span class="keyword">var</span> first = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> second = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> third = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> fourth = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> fetchAll = <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">let</span> a = <span class="keyword">await</span> first() <span class="comment">// 等待第一個請求執行結束，取回結果給a</span></div><div class="line">  <span class="built_in">console</span>.log(a) <span class="comment">// 1</span></div><div class="line">  sum += a <span class="comment">// 加總</span></div><div class="line">  <span class="keyword">let</span> b = <span class="keyword">await</span> second() <span class="comment">// 等待第二個請求執行結束，取回結果給b</span></div><div class="line">  <span class="built_in">console</span>.log(b) <span class="comment">// 1</span></div><div class="line">  sum += b <span class="comment">// 加總</span></div><div class="line">  <span class="keyword">let</span> c = <span class="keyword">await</span> third() <span class="comment">// 等待第三個請求執行結束，取回結果給c</span></div><div class="line">  <span class="built_in">console</span>.log(c) <span class="comment">// 1</span></div><div class="line">  sum += c <span class="comment">// 加總</span></div><div class="line">  <span class="keyword">let</span> d = <span class="keyword">await</span> fourth() <span class="comment">// 等待第四個請求執行結束，取回結果給c</span></div><div class="line">  <span class="built_in">console</span>.log(d) <span class="comment">// 1</span></div><div class="line">  sum += d <span class="comment">// 加總</span></div><div class="line">  </div><div class="line">  <span class="comment">// 全部請求結束</span></div><div class="line">  <span class="built_in">console</span>.log(sum) <span class="comment">// 4 做最後處理</span></div><div class="line">&#125;</div><div class="line"></div><div class="line">fetchAll()</div></pre></td></tr></table></figure>
+<h2><span id="處理併發請求">處理併發請求</span></h2>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> first = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> second = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> third = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> fourth = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve</span>) </span>&#123;</div><div class="line">    setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      resolve(<span class="number">1</span>)</div><div class="line">    &#125;, <span class="number">1000</span>)</div><div class="line">  &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 使用Promise.all([])，四個非同步請求會同時併發，等待全部都做完以後執行callback</span></div><div class="line"><span class="built_in">Promise</span>.all([first(), second(), third(), fourth()])</div><div class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">result</span>) </span>&#123;</div><div class="line">  <span class="comment">// [1, 1, 1, 1]</span></div><div class="line">  <span class="built_in">console</span>.log(result)</div><div class="line">  <span class="keyword">let</span> sum = result.reduce(<span class="function">(<span class="params">cur, next</span>) =&gt;</span> cur + next)</div><div class="line">  <span class="comment">// 4</span></div><div class="line">  <span class="built_in">console</span>.log(sum)</div><div class="line">&#125;).catch(<span class="built_in">console</span>.error)</div><div class="line"></div><div class="line"><span class="comment">// 使用async/await</span></div><div class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">fetchAll</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="comment">// 遠端抓取資料是可能失敗的! 記得用try/catch做error handling</span></div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">    <span class="keyword">let</span> result = <span class="keyword">await</span> <span class="built_in">Promise</span>.all([first(), second(), third(), fourth()])</div><div class="line">    <span class="comment">// [1, 1, 1, 1]</span></div><div class="line">    <span class="built_in">console</span>.log(result)</div><div class="line">    <span class="keyword">let</span> sum = result.reduce(<span class="function">(<span class="params">cur, next</span>) =&gt;</span> cur + next)</div><div class="line">    <span class="comment">// 4</span></div><div class="line">    <span class="built_in">console</span>.log(sum)</div><div class="line">  &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">    <span class="built_in">console</span>.log(e)</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">fetchAll()</div></pre></td></tr></table></figure>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/08/23/Ethereum智能合約-101/" data-toggle="tooltip" data-placement="top" title="Ethereum智能合約 101">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/08/22/Javascript-Functional-Programming/" data-toggle="tooltip" data-placement="top" title="Javascript Functional Programming">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Javascript非同步處理 / Promise / Async Await</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.1.</span> <span class="toc-nav-text">Node.js線程模型</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.2.</span> <span class="toc-nav-text">Javascript非同步程式與處理Callback Hell</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.3.</span> <span class="toc-nav-text">Promise來拯救!</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.4.</span> <span class="toc-nav-text">先談ES6 Generator與yield</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.5.</span> <span class="toc-nav-text">ES7 Async Await</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.6.</span> <span class="toc-nav-text">處理併發請求</span></a></li></ol></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#js" title="js">js</a>
+                        
+                          <a class="tag" href="/tags/#101" title="101">101</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "benjaminlu";
+    var disqus_identifier = "https://benjaminlu.github.io/2017/08/22/Javascript非同步處理-Promise-Async-Await/";
+    var disqus_url = "https://benjaminlu.github.io/2017/08/22/Javascript非同步處理-Promise-Async-Await/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/Benjamin.Lu.J">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/BenjaminLu">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/benjamin-lu-893b8b109">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Benjamin Lu 2017
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://benjaminlu.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-52139860-2';
+    var _gaDomain = 'benjaminlu.github.io';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<img src="https://benjaminlu.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
