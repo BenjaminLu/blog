@@ -14,7 +14,7 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <title>
         
-          Zcash原理 - Benjamin Lu | 技術站
+          Zcash基本原理 - Benjamin Lu | 技術站
         
     </title>
 
@@ -93,7 +93,7 @@
                               <a class="tag" href="/blog/tags/#Zcash" title="Zcash">Zcash</a>
                             
                         </div>
-                        <h1>Zcash原理</h1>
+                        <h1>Zcash基本原理</h1>
                         <h2 class="subheading"></h2>
                         <span class="meta">
                             Posted by Benjamin Lu on
@@ -214,7 +214,134 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                
+                <p><a href="https://z.cash/" target="_blank" rel="external">Zcash</a>算是區塊鏈目前發展中隱私性做的最徹底的系統</p>
+<p>本篇文章會先講解Zcash的交易結構，驗證交易是否合法的抽象觀念，盡量解釋怎麼產生一個private transaction，以及礦工驗證private transaction的一些原理。</p>
+<p>因為Zcash本身是來自bitcoin專案，故相關內容可能會隱含到<a href="https://bitcoin.org/en/glossary/unspent-transaction-output" target="_blank" rel="external">UTXO</a>相關知識</p>
+<h1><span id="交易結構與地址種類">交易結構與地址種類</span></h1>
+<p><img src="https://z.cash/images/high-level-txn_v3.png" alt="交易"></p>
+<p>上圖是一個Zcash交易在網路中的抽象概念圖，其中，<code>Shielded address</code>表示的是這種地址是具有隱私性的，通常以字母<code>z</code>開頭，或稱<code>z-addrs</code>，一個交易的送方可以是z-addr同時收方也是一個z-addr，而其他的交易資訊，如送的ZEC數量與收的ZEC數量同時都可以遮蔽保有隱私性，而證明某個地址的確保有某個utxo的所有權並可交易，則需要透過密碼學的<code>zero-knowledge proof</code>的方式產生一個證明，並且此種零知識證明具有non-interactive的性質，亦即任意public verifier皆可自行驗證<code>某個prover有權花費某個utxo</code>這件事的真偽，我們將在後面的篇章詳談細節。</p>
+<p>同樣的，Zcash中也可以傳送一般訊息透明的交易，其中資訊公開的地址常為<code>t</code>開頭，稱<code>t-addrs</code>或<code>Transparent addresses</code>，而這些透明的地址在產生交易時，需要與<code>Transparent Value Pool(TVP)</code>互動，並且產生公開的交易資料。</p>
+<p>交易手續費將永遠是公開的，故一個Zcash transaction本身可以包含隱私的地址、公開的地址、隱私的ZEC數量、公開的ZEC數量、公開的手續費等資料。</p>
+<p>我們可以在blockchain explorer看到這樣的<a href="https://explorer.zcha.in/transactions/576b75b420e99dd149410e61213bf4f73189160ebd4b9791d49d6fd14e86d396" target="_blank" rel="external">例子</a></p>
+<p>在其他UTXO架構的區塊鏈，因為一個交易的送方和收方地址都是公開的，故常常找零地址會為了要做混淆保持匿名性，所以每一個交易會產生一個新的找零地址，但在Zcash中，因為z-addrs本身就是保有隱私性的地址，故重複使用這些地址當作找零地址並不會有任何弱點問題。</p>
+<h1><span id="交易隱私性的種類">交易隱私性的種類</span></h1>
+<p><img src="https://z.cash/images/basic-txn-types_v2.png" alt="交易隱私性"></p>
+<p>由上一個章節可以知道地址分成公開的t-addrs和隱私的z-addrs，排列組合即可造就幾種不同隱私等級的交易:</p>
+<ol>
+<li>Public</li>
+<li>Shielding</li>
+<li>Deshielding</li>
+<li>Private</li>
+</ol>
+<h2><span id="public">Public</span></h2>
+<p>此種交易的交易收送方和金額都是公開的，與bitcoin相同，可以說是沒有任何隱私性，只有區塊鏈自有的匿名性</p>
+<h2><span id="shielding">Shielding</span></h2>
+<p>若由公開地址將完整將金額送給另一個隱私地址，則這樣的交易其實就算收方地址和收取的金額是具有隱私性的，但因為送方的資料是公開的，故其實已經泄露的交易金額的資訊，所以這種交易只有斷開未來相關交易地址的<code>linkability (連結性)</code>，但若收方地址有多個隱私地址，則可能是送方自己的隱私找零地址，故依然無法猜測真的收方到底收到了多少錢，只有一個可猜測的金額範圍。</p>
+<p>如<a href="https://explorer.zcha.in/transactions/de1d78ee310ba2c9fbeb13881f431fdc8b55aa5f79e61dd3c294177401878f11" target="_blank" rel="external">此例</a></p>
+<h2><span id="deshielding">Deshielding</span></h2>
+<p>將會公開原本的隱私金額資料，但由於交易送方是z-addr，因此也無法透過UTXO的特性往貨幣的上游追蹤。</p>
+<h2><span id="private">Private</span></h2>
+<p>什麼都看不到，跟國防布一樣</p>
+<h1><span id="private交易">Private交易</span></h1>
+<h2><span id="private交易的資料庫觀念">Private交易的資料庫觀念</span></h2>
+<p>每一個未花掉的UTXOs可以想成是一個擁有者的public key和BTC數量的<code>note</code>，為了簡單說明概念，假設每個note表示1BTC，並且每一個note都有個隨機的序列號<code>r</code>，則一個未花費的UTXO資料庫可以表示為:</p>
+<table>
+<thead>
+<tr>
+<th>Note1 = (PK1, r1)</th>
+<th>Note2 = (PK2, r2)</th>
+<th>Note3 = (𝖯𝖪3, r3)</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<p>則要做到隱私的第一步則是，完整節點不直接儲存這些note資料而是儲存note的密文或hash value。</p>
+<table>
+<thead>
+<tr>
+<th>H1 = HASH(Note1)</th>
+<th>H2 = HASH(Note2)</th>
+<th>H3 = HASH(Note3)</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<p>要做到隱私的第二步是這個資料庫會保存這些hash，即使某個UTXO已經被花掉了，那麼，現在這個資料庫就不是只記錄尚未花掉的UTXO了，而是所有產生的UTXO都要保留，那麼要如何分辨哪些已經花掉，哪些沒花掉呢?這時候就會用到<code>nullifier set</code>，記錄哪些note的序列號的r之hash value，表示某個note已經被使用掉了，舉例，當note2被使用掉之後，現在note資料庫應該如下表:</p>
+<table>
+<thead>
+<tr>
+<th>HASHED NOTES</th>
+<th>NULLIFIER SET</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1 = HASH(Note1)</td>
+<td>nf1 = HASH(r2)</td>
+</tr>
+<tr>
+<td>H2 = HASH(Note2)</td>
+<td></td>
+</tr>
+<tr>
+<td>H3 = HASH(Note3)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2><span id="產生一個private交易">產生一個Private交易</span></h2>
+<p>假設Alice擁有note1，想要交易給Bob，Bob的公鑰是PK4，在先不解釋太多密碼學的前提下，先假設Alice和Bob之間有個私有通道可以直接溝通，則一個交易會如下步驟執行:</p>
+<ol>
+<li>Alice隨機挑選一個<code>r4</code>，並定義新的<code>Note4=(PK4, r4)</code></li>
+<li>Alice透過私有通道傳送Note4給Bob</li>
+<li>Alice傳送Note1的nullifier，<code>nf2=HASH(r1)</code>給所有完整節點</li>
+<li>Alice傳送Note4的hash value，<code>H4=HASH(Note4)</code>給所有完整節點</li>
+</ol>
+<p>當每個完整節點接收到<code>nf2</code>和<code>H4</code>，會檢查<code>nf2</code>是不是在nullifier set中，若不存在，則將<code>nf2</code>加到nullifier set中，並將<code>H4</code>加到hashed notes中，故經過Alice和Bob此次交易後，note資料庫如下表:</p>
+<table>
+<thead>
+<tr>
+<th>HASHED NOTES</th>
+<th>NULLIFIER SET</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1 = HASH(Note1)</td>
+<td>nf1 = HASH(r2)</td>
+</tr>
+<tr>
+<td>H2 = HASH(Note2)</td>
+<td>nf2 = HASH(𝗋1)</td>
+</tr>
+<tr>
+<td>H3 = HASH(Note3)</td>
+<td></td>
+</tr>
+<tr>
+<td>H4 = HASH(Note4)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>But!完整節點檢查了note1之前有沒有被花掉，但我們並沒有檢查它是不是屬於Alice的，甚至，我們根本沒檢查它是不是一個合法的note，如何檢查它是不是一個合法的note，只要完整節點將note1做hash並與hashed notes列表比較，是不是存在此hash value即可，但這會要求Alice廣播note1給所有完整節點，這就違反了我們想達到的隱私。</p>
+<p>是時候讓Zero-Knowledge proofs來拯救了!</p>
+<h2><span id="zero-knowledge-proofs">Zero-Knowledge proofs</span></h2>
+<p>經過上述的情境，我們可以知道，條件是要在不洩漏note1詳細資料等隱私的情況下，提出一個proof string，稱<code>π</code>，給所有完整節點，並單靠這個<code>π</code>就能說服所有的public verifier，任何能廣播<code>π</code>的人，他的確知道<code>PK1(公鑰)</code>, <code>SK1(私鑰)</code>和<code>r1(note1對應的序列號)</code>，且能夠使得:</p>
+<ol>
+<li><code>Note1=(PK1, r1)</code>之hash value，存在hashed notes中</li>
+<li><code>SK1</code>是對應<code>PK1</code>的私鑰(任何能證明自己有私鑰的人，就證明了有Note1的所有權)</li>
+<li><code>r1</code>的hash value是<code>nf2</code>(由此可知，<code>nf2</code>是Note1的nullifier，並且<code>nf2</code>尚未在nullifier set中，所以Note1還沒被花掉)</li>
+</ol>
+<p>這個零知識證明<code>π</code>還有個最重要的特性，保證不會洩漏任何關於<code>PK1</code>, <code>SK1</code>和<code>r1</code>的資訊。</p>
+<p>以上是Zcash在private transaction上非常簡化的說明，為的是先建立讀者對零知識證明的需求從何而來的導讀，中間有很多事情在實際上更為嚴謹，如:</p>
+<ol>
+<li>hashed notes實際上並不是一個list，而是以Merkle tree的形式組織的，為的是更有效的建立Zero-Knowledge proofs，<code>π</code>，更進一步，我們還要儲存note對應的<code>computationally hiding</code>和<code>binding commitment</code>，而不是只儲存note對應的hash</li>
+<li>nullifier需要被定義的更複雜，為了保障接收方與送方的隱私</li>
+<li>此處並沒有提到如何消除Alice和Bob之間建立隱私通道的需求</li>
+</ol>
+<p>我們將在後續介紹整個<code>zkSNARKs</code>時，一一解答。</p>
+
                 
 
                 <hr>
@@ -253,7 +380,7 @@
         <div id="toc" class="toc-article">
         <strong class="toc-title">Contents</strong>
         
-          <ol class="nav">none</ol>
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">交易結構與地址種類</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">交易隱私性的種類</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">Public</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">Shielding</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.3.</span> <span class="toc-nav-text">Deshielding</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">2.4.</span> <span class="toc-nav-text">Private</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">Private交易</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">Private交易的資料庫觀念</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">產生一個Private交易</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#undefined"><span class="toc-nav-number">3.3.</span> <span class="toc-nav-text">Zero-Knowledge proofs</span></a></li></ol></li></ol>
         
         </div>
       </aside>
